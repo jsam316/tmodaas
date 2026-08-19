@@ -100,6 +100,32 @@ window.TMODAAS_CATALOG = [
     },
   },
   {
+    key: 'container', label: 'Container Platform / Kubernetes', layer: 'Infrastructure', inPath: false,
+    vendors: {
+      'Kubernetes (self-managed)': [
+        { t: 'Enforce RBAC and disable anonymous access', d: 'Apply least-privilege Role/ClusterRole bindings, disable the legacy ABAC/insecure port, and remove system:anonymous cluster-admin bindings.', iso: 'A.9.4.1', pci: '7.1.2', sev: 'High' },
+        { t: 'Apply Pod Security Standards', d: 'Enforce the "restricted" Pod Security Standard (or OPA/Kyverno policies) to block privileged containers, host namespace sharing and hostPath mounts.', iso: 'A.13.1.3', pci: '2.2.4', sev: 'High' },
+        { t: 'Encrypt and restrict etcd', d: 'Enable encryption at rest for Secrets, restrict etcd to the control-plane network only and require mutual TLS for client access.', iso: 'A.10.1.1', pci: '3.4', sev: 'High' },
+        { t: 'Scan images and enforce admission control', d: 'Scan container images for CVEs in the pipeline and use an admission controller to block unsigned or vulnerable images from running.', iso: 'A.12.6.1', pci: '6.3.2', sev: 'High' },
+        { t: 'Apply network policies and audit logging', d: 'Default-deny pod-to-pod traffic with NetworkPolicies (Calico/Cilium) and enable the Kubernetes audit log forwarded to a SIEM.', iso: 'A.13.1.1', pci: '10.2', sev: 'Medium' },
+      ],
+      'Amazon EKS': [
+        { t: 'Use IRSA instead of node instance roles', d: 'Grant AWS permissions to pods via IAM Roles for Service Accounts rather than broad node IAM roles, so a compromised pod cannot assume the node’s full permissions.', iso: 'A.9.2.3', pci: '7.1.2', sev: 'High' },
+        { t: 'Restrict API server endpoint access', d: 'Disable or restrict the public EKS API endpoint to allow-listed CIDRs and prefer private endpoint access from a bastion/VPN.', iso: 'A.13.1.1', pci: '1.2.1', sev: 'High' },
+        { t: 'Scan images with Amazon ECR/Inspector', d: 'Enable ECR image scanning and Amazon Inspector for container images, and block deployment of images with critical findings via admission policy.', iso: 'A.12.6.1', pci: '6.3.2', sev: 'High' },
+        { t: 'Enable EKS control-plane logging', d: 'Turn on API server, audit, authenticator and scheduler logs to CloudWatch and forward to a SIEM with alerting on RBAC/API anomalies.', iso: 'A.12.4.1', pci: '10.5.1', sev: 'Medium' },
+        { t: 'Apply Pod Security Standards and network policy', d: 'Enforce the "restricted" Pod Security Standard and use Amazon VPC CNI/Calico network policies to default-deny pod-to-pod traffic.', iso: 'A.13.1.3', pci: '2.2.4', sev: 'High' },
+      ],
+      'Docker Engine': [
+        { t: 'Run containers as a non-root user', d: 'Set USER in Dockerfiles and run the daemon with user namespace remapping so a container escape does not yield host root.', iso: 'A.9.4.4', pci: '2.2.2', sev: 'High' },
+        { t: 'Restrict the Docker daemon socket', d: 'Never expose the Docker socket over TCP without TLS client auth, and avoid mounting /var/run/docker.sock into containers.', iso: 'A.9.4.2', pci: '1.3', sev: 'High' },
+        { t: 'Scan images before deployment', d: 'Scan images with Trivy/Docker Scout in CI and pin base images to digests rather than mutable tags to prevent supply-chain drift.', iso: 'A.12.6.1', pci: '6.3.2', sev: 'High' },
+        { t: 'Apply resource and capability limits', d: 'Drop unnecessary Linux capabilities (--cap-drop=ALL, add back only what is required), set memory/CPU limits and enable seccomp/AppArmor profiles.', iso: 'A.13.1.3', pci: '2.2.4', sev: 'Medium' },
+        { t: 'Enable and centralise daemon logging', d: 'Configure a logging driver that ships container and daemon events to a central collector, and enable Docker Content Trust for image signing.', iso: 'A.12.4.1', pci: '10.2', sev: 'Medium' },
+      ],
+    },
+  },
+  {
     key: 'operatingSystem', label: 'Operating System', layer: 'Infrastructure', inPath: false,
     vendors: {
       'Windows Server': [
