@@ -195,19 +195,34 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
             </div>
             <div style="display:flex;flex-direction:column">
               <sc-for list="{{ grp.controls }}" as="ctl" hint-placeholder-count="3">
-                <div style="padding:16px 24px;border-bottom:1px solid color-mix(in srgb, var(--color-text) 7%, transparent);display:grid;grid-template-columns:1fr auto;gap:16px;align-items:start">
-                  <div>
-                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:5px">
-                      <span style="font-size:14px;font-weight:500;color:var(--color-text)">{{ ctl.t }}</span>
-                      <span style="{{ ctl.sevStyle }}">{{ ctl.sev }}</span>
+                <div style="padding:16px 24px;border-bottom:1px solid color-mix(in srgb, var(--color-text) 7%, transparent)">
+                  <div style="display:grid;grid-template-columns:1fr auto;gap:16px;align-items:start">
+                    <div>
+                      <div style="display:flex;align-items:center;gap:10px;margin-bottom:5px">
+                        <span style="font-size:14px;font-weight:500;color:var(--color-text)">{{ ctl.t }}</span>
+                        <span style="{{ ctl.sevStyle }}">{{ ctl.sev }}</span>
+                      </div>
+                      <p style="font-size:13.5px;color:var(--color-neutral-400);line-height:1.55;margin:0;max-width:640px;text-wrap:pretty">{{ ctl.d }}</p>
                     </div>
-                    <p style="font-size:13.5px;color:var(--color-neutral-400);line-height:1.55;margin:0;max-width:640px;text-wrap:pretty">{{ ctl.d }}</p>
+                    <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+                      <sc-for list="{{ ctl.tags }}" as="tag" hint-placeholder-count="2">
+                        <span style="font-size:11px;letter-spacing:0.02em;color:var(--color-neutral-300);border:1px solid var(--color-divider);padding:3px 10px;border-radius:calc(var(--radius-md) * 0.75);white-space:nowrap">{{ tag }}</span>
+                      </sc-for>
+                    </div>
                   </div>
-                  <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
-                    <sc-for list="{{ ctl.tags }}" as="tag" hint-placeholder-count="2">
-                      <span style="font-size:11px;letter-spacing:0.02em;color:var(--color-neutral-300);border:1px solid var(--color-divider);padding:3px 10px;border-radius:calc(var(--radius-md) * 0.75);white-space:nowrap">{{ tag }}</span>
-                    </sc-for>
-                  </div>
+                  <sc-if value="{{ ctl.cmd }}" hint-placeholder-val="{{ false }}">
+                    <div style="margin-top:10px">
+                      <button data-noprint="true" onClick="{{ ctl.toggleCmd }}" style="font-size:12px;font-family:var(--font-heading);color:var(--color-accent);background:transparent;border:none;padding:0;cursor:pointer;display:inline-flex;align-items:center;gap:5px">
+                        <span style="display:inline-block;transition:transform 0.15s;transform:{{ ctl.caretTransform }}">▸</span>{{ ctl.cmdToggleLabel }}
+                      </button>
+                      <sc-if value="{{ ctl.cmdOpen }}" hint-placeholder-val="{{ false }}">
+                        <div style="position:relative;margin-top:8px;max-width:640px">
+                          <pre style="margin:0;padding:12px 44px 12px 14px;background:var(--color-bg);border:1px solid var(--color-divider);border-radius:var(--radius-md);font-size:12.5px;line-height:1.5;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--color-neutral-200);white-space:pre-wrap;word-break:break-word;overflow-x:auto">{{ ctl.cmd }}</pre>
+                          <button data-noprint="true" onClick="{{ ctl.copyCmd }}" title="Copy command" style="position:absolute;top:8px;right:8px;font-size:11px;font-family:var(--font-heading);color:var(--color-neutral-300);background:var(--color-surface);border:1px solid var(--color-divider);border-radius:var(--radius-sm);padding:4px 8px;cursor:pointer">Copy</button>
+                        </div>
+                      </sc-if>
+                    </div>
+                  </sc-if>
                 </div>
               </sc-for>
             </div>
@@ -254,6 +269,7 @@ class Component extends DCLogic {
     filter: 'all',
     emailOpen: false,
     toast: '',
+    expandedCmds: {},
   };
 
   SAMPLE = {
@@ -371,14 +387,35 @@ class Component extends DCLogic {
       .filter((cat) => s.selections[cat.key])
       .map((cat) => {
         const vendor = s.selections[cat.key];
-        const controls = (cat.vendors[vendor] || []).filter(filterMatch).map((c) => ({
-          t: c.t, d: c.d, sev: c.sev,
-          sevStyle: 'font-size:10.5px;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;padding:2px 9px;border-radius:calc(var(--radius-md) * 0.75);' +
-            (c.sev === 'High'
-              ? 'color:var(--color-accent-200);background:var(--color-accent-800)'
-              : 'color:var(--color-neutral-300);background:var(--color-neutral-800)'),
-          tags: [c.iso ? 'ISO 27001 ' + c.iso : null, c.pci ? 'PCI DSS ' + c.pci : null].filter(Boolean),
-        }));
+        const controls = (cat.vendors[vendor] || []).filter(filterMatch).map((c) => {
+          const cmdId = cat.key + '::' + vendor + '::' + c.t;
+          const cmdOpen = !!s.expandedCmds[cmdId];
+          return {
+            t: c.t, d: c.d, sev: c.sev, cmd: c.cmd || '',
+            sevStyle: 'font-size:10.5px;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;padding:2px 9px;border-radius:calc(var(--radius-md) * 0.75);' +
+              (c.sev === 'High'
+                ? 'color:var(--color-accent-200);background:var(--color-accent-800)'
+                : 'color:var(--color-neutral-300);background:var(--color-neutral-800)'),
+            tags: [c.iso ? 'ISO 27001 ' + c.iso : null, c.pci ? 'PCI DSS ' + c.pci : null].filter(Boolean),
+            cmdOpen,
+            cmdToggleLabel: cmdOpen ? 'Hide command' : 'Show command',
+            caretTransform: cmdOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+            toggleCmd: () => this.setState((prev) => {
+              const next = Object.assign({}, prev.expandedCmds);
+              if (next[cmdId]) delete next[cmdId]; else next[cmdId] = true;
+              return { expandedCmds: next };
+            }),
+            copyCmd: () => {
+              if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(c.cmd || '')
+                  .then(() => this.showToast('Command copied to clipboard'))
+                  .catch(() => this.showToast('Could not copy — select and copy manually'));
+              } else {
+                this.showToast('Clipboard unavailable — select and copy manually');
+              }
+            },
+          };
+        });
         return { key: cat.key, label: cat.label, vendor, controls, count: controls.length };
       })
       .filter((g) => g.count > 0);
