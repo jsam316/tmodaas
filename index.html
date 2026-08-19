@@ -113,11 +113,11 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
         <sc-for list="{{ categories }}" as="cat" hint-placeholder-count="7">
           <div style="{{ cat.cardStyle }}">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-              <span style="font-size:15px;font-weight:500;font-family:var(--font-heading)">{{ cat.label }}</span>
+              <label for="{{ cat.fieldId }}" style="font-size:15px;font-weight:500;font-family:var(--font-heading)">{{ cat.label }}</label>
               <span class="tag tag-neutral">{{ cat.layer }}</span>
             </div>
             <div style="font-size:12.5px;color:var(--color-neutral-600);margin-bottom:14px">{{ cat.hint }}</div>
-            <select class="input" value="{{ cat.value }}" onChange="{{ cat.onChange }}" style="cursor:pointer">
+            <select id="{{ cat.fieldId }}" class="input" value="{{ cat.value }}" onChange="{{ cat.onChange }}" style="cursor:pointer">
               <option value="">Not in scope</option>
               <sc-for list="{{ cat.options }}" as="opt" hint-placeholder-count="2">
                 <option value="{{ opt }}">{{ opt }}</option>
@@ -128,7 +128,12 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
       </div>
       <div data-noprint="true" style="position:fixed;bottom:0;left:0;right:0;background:var(--color-surface);border-top:1px solid var(--color-divider);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;z-index:15">
         <span style="font-size:13.5px;color:var(--color-neutral-400)"><strong style="color:var(--color-text);font-weight:500">{{ selectedCount }}</strong> of {{ categoryCount }} asset layers selected</span>
-        <button class="btn btn-primary" disabled="{{ generateDisabled }}" onClick="{{ generate }}" style="min-height:38px;padding-left:20px;padding-right:20px">Generate recommendations →</button>
+        <div style="display:flex;align-items:center;gap:10px">
+          <sc-if value="{{ selectedCount }}" hint-placeholder-val="{{ false }}">
+            <button class="btn btn-secondary" onClick="{{ clearSelections }}">Clear all</button>
+          </sc-if>
+          <button class="btn btn-primary" disabled="{{ generateDisabled }}" onClick="{{ generate }}" style="min-height:38px;padding-left:20px;padding-right:20px">Generate recommendations →</button>
+        </div>
       </div>
     </div>
   </sc-if>
@@ -228,7 +233,7 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
 
   <!-- ============ TOAST ============ -->
   <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
-    <div data-noprint="true" style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--color-surface);color:var(--color-text);font-size:13.5px;padding:11px 20px;border-radius:var(--radius-md);z-index:60;animation:toastIn 0.25s ease;box-shadow:var(--shadow-md)">{{ toast }}</div>
+    <div data-noprint="true" role="status" aria-live="polite" style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--color-surface);color:var(--color-text);font-size:13.5px;padding:11px 20px;border-radius:var(--radius-md);z-index:60;animation:toastIn 0.25s ease;box-shadow:var(--shadow-md)">{{ toast }}</div>
   </sc-if>
 </div>
 
@@ -260,17 +265,46 @@ class Component extends DCLogic {
     database: 'Microsoft SQL Server',
   };
 
+  STORAGE_KEY = 'tmodaas.session.v1';
+
+  loadPersisted() {
+    try {
+      const raw = window.localStorage.getItem(this.STORAGE_KEY);
+      if (!raw) return null;
+      const saved = JSON.parse(raw);
+      if (!saved || typeof saved !== 'object') return null;
+      return saved;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  persist() {
+    try {
+      const s = this.state;
+      if (!s.user) { window.localStorage.removeItem(this.STORAGE_KEY); return; }
+      window.localStorage.setItem(this.STORAGE_KEY, JSON.stringify({
+        screen: s.screen, user: s.user, selections: s.selections, filter: s.filter,
+      }));
+    } catch (e) { /* storage unavailable (private browsing, quota) — fail silently */ }
+  }
+
   componentDidMount() {
     const apply = () => {
       if (!window.TMODAAS_CATALOG) { this._catalogPoll = setTimeout(apply, 60); return; }
       const next = { catalog: window.TMODAAS_CATALOG };
       const start = this.props.startScreen;
-      if (this.props.prefillSample || start === 'results') {
-        next.selections = Object.assign({}, this.SAMPLE);
-      }
-      if (start === 'select' || start === 'results') {
-        next.screen = start;
-        next.user = this.state.user || { first: 'Demo', last: 'User', email: 'demo@tmodaas.example' };
+      const saved = this.loadPersisted();
+      if (saved && saved.user && !this.props.prefillSample && start !== 'select' && start !== 'results') {
+        Object.assign(next, saved);
+      } else {
+        if (this.props.prefillSample || start === 'results') {
+          next.selections = Object.assign({}, this.SAMPLE);
+        }
+        if (start === 'select' || start === 'results') {
+          next.screen = start;
+          next.user = this.state.user || { first: 'Demo', last: 'User', email: 'demo@tmodaas.example' };
+        }
       }
       if (this.props.defaultFilter && this.props.defaultFilter !== 'all') {
         next.filter = this.props.defaultFilter;
@@ -278,6 +312,10 @@ class Component extends DCLogic {
       this.setState(next);
     };
     apply();
+  }
+
+  componentDidUpdate() {
+    this.persist();
   }
 
   componentWillUnmount() {
@@ -308,7 +346,7 @@ class Component extends DCLogic {
     const categories = catalog.map((cat) => {
       const value = s.selections[cat.key] || '';
       return {
-        key: cat.key, label: cat.label, layer: cat.layer,
+        key: cat.key, label: cat.label, layer: cat.layer, fieldId: 'asset-' + cat.key,
         hint: cat.inPath ? 'In the request / response path' : 'Underlying platform layer',
         options: Object.keys(cat.vendors),
         value,
@@ -347,7 +385,7 @@ class Component extends DCLogic {
     const totalControls = resultGroups.reduce((a, g) => a + g.count, 0);
 
     // data path diagram
-    const pathOrder = ['firewall', 'loadBalancer', 'web', 'middleware', 'database'];
+    const pathOrder = ['firewall', 'loadBalancer', 'serverless', 'web', 'middleware', 'database'];
     const nodeStyle = (accent) =>
       'border-radius:var(--radius-md);padding:10px 16px;' +
       (accent
@@ -362,6 +400,7 @@ class Component extends DCLogic {
     const foundationParts = [];
     if (s.selections.operatingSystem) foundationParts.push(s.selections.operatingSystem + ' (OS)');
     if (s.selections.hypervisor) foundationParts.push(s.selections.hypervisor + ' (Hypervisor)');
+    if (s.selections.container) foundationParts.push(s.selections.container + ' (Containers)');
     const foundationLabel = foundationParts.join('  ·  ');
 
     // filter chips
@@ -394,7 +433,10 @@ class Component extends DCLogic {
       signedIn: !!user,
       userEmail: user ? user.email : 'guest@tmodaas.example',
       userInitials: user ? ((user.first[0] || '') + (user.last[0] || '')).toUpperCase() : 'G',
-      signOut: () => this.setState({ user: null, screen: 'register', selections: {}, filter: 'all' }),
+      signOut: () => {
+        try { window.localStorage.removeItem(this.STORAGE_KEY); } catch (e) { /* ignore */ }
+        this.setState({ user: null, screen: 'register', selections: {}, filter: 'all' });
+      },
 
       // registration
       pitchPoints: [
@@ -427,6 +469,10 @@ class Component extends DCLogic {
       loadSample: () => {
         this.setState({ selections: Object.assign({}, this.SAMPLE) });
         this.showToast('Loaded sample scenario from the dissertation test case');
+      },
+      clearSelections: () => {
+        this.setState({ selections: {} });
+        this.showToast('Cleared all selections');
       },
       generate: () => {
         if (!canGenerate) { this.showToast('Select at least one asset first'); return; }
