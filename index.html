@@ -385,7 +385,7 @@ class Component extends DCLogic {
     const totalControls = resultGroups.reduce((a, g) => a + g.count, 0);
 
     // data path diagram
-    const pathOrder = ['firewall', 'loadBalancer', 'web', 'middleware', 'database'];
+    const pathOrder = ['firewall', 'loadBalancer', 'serverless', 'web', 'middleware', 'database'];
     const nodeStyle = (accent) =>
       'border-radius:var(--radius-md);padding:10px 16px;' +
       (accent

@@ -145,6 +145,32 @@ window.TMODAAS_CATALOG = [
     },
   },
   {
+    key: 'serverless', label: 'Serverless / PaaS', layer: 'Application', inPath: true,
+    vendors: {
+      'AWS Lambda': [
+        { t: 'Grant least-privilege execution roles', d: 'Scope each function’s IAM execution role to the specific resources/actions it needs; never reuse a broad shared role across unrelated functions.', iso: 'A.9.2.3', pci: '7.1.2', sev: 'High' },
+        { t: 'Keep runtimes and dependencies patched', d: 'Track deprecated/EOL Lambda runtimes, rebuild on the latest supported runtime and scan layers and dependencies for known CVEs in the pipeline.', iso: 'A.12.6.1', pci: '6.3.2', sev: 'High' },
+        { t: 'Validate all inputs and encrypt environment variables', d: 'Treat event payloads (API Gateway, S3, SQS) as untrusted input, and encrypt sensitive environment variables with a customer-managed KMS key.', iso: 'A.14.2.5', pci: '6.5', sev: 'High' },
+        { t: 'Restrict function URLs and resource policies', d: 'Avoid public Function URLs/API Gateway routes without authorization, and scope resource-based policies to specific principals rather than "*".', iso: 'A.13.1.1', pci: '1.2.1', sev: 'High' },
+        { t: 'Enable structured logging and tracing', d: 'Ship function logs to CloudWatch/a SIEM with structured JSON and enable X-Ray tracing to detect anomalous invocation patterns.', iso: 'A.12.4.1', pci: '10.2', sev: 'Medium' },
+      ],
+      'Azure App Service / Functions': [
+        { t: 'Use managed identities instead of secrets', d: 'Authenticate to Azure resources with system/user-assigned managed identities rather than connection strings or keys embedded in app settings.', iso: 'A.9.2.3', pci: '7.1.2', sev: 'High' },
+        { t: 'Restrict inbound access with access restrictions', d: 'Configure App Service access restrictions or Private Endpoints so the app is reachable only from expected networks (e.g. behind Front Door/APIM).', iso: 'A.13.1.1', pci: '1.2.1', sev: 'High' },
+        { t: 'Enforce HTTPS and modern TLS', d: 'Enable "HTTPS Only", set the minimum TLS version to 1.2+, and disable FTP/basic auth deployment credentials.', iso: 'A.10.1.1', pci: '4.1', sev: 'High' },
+        { t: 'Store secrets in Key Vault', d: 'Reference Key Vault secrets via app setting references instead of storing API keys/connection strings in plaintext configuration.', iso: 'A.10.1.2', pci: '3.5', sev: 'High' },
+        { t: 'Enable diagnostic logging and Defender for App Service', d: 'Turn on App Service diagnostic logs to Log Analytics and enable Microsoft Defender for App Service to detect anomalous activity.', iso: 'A.12.4.1', pci: '10.5.1', sev: 'Medium' },
+      ],
+      'Google Cloud Run / App Engine': [
+        { t: 'Run services with a dedicated least-privilege service account', d: 'Assign each service its own service account scoped to only the APIs/resources it calls, instead of the default Compute Engine service account.', iso: 'A.9.2.3', pci: '7.1.2', sev: 'High' },
+        { t: 'Require authentication on internal services', d: 'Remove "allow unauthenticated" on services that are not meant to be public and use IAM invoker roles or Identity-Aware Proxy for internal callers.', iso: 'A.13.1.1', pci: '1.2.1', sev: 'High' },
+        { t: 'Pin and scan container images', d: 'Deploy images by digest rather than mutable tag, scan them with Artifact Registry vulnerability scanning, and enforce Binary Authorization for production.', iso: 'A.12.6.1', pci: '6.3.2', sev: 'High' },
+        { t: 'Store secrets in Secret Manager', d: 'Mount configuration secrets from Secret Manager rather than baking them into images or environment variables in plaintext.', iso: 'A.10.1.2', pci: '3.5', sev: 'High' },
+        { t: 'Enable Cloud Audit and request logging', d: 'Enable Admin Activity/Data Access audit logs and Cloud Run request logs, exported to a SIEM with alerting on IAM/policy changes.', iso: 'A.12.4.1', pci: '10.5.1', sev: 'Medium' },
+      ],
+    },
+  },
+  {
     key: 'web', label: 'Web Server', layer: 'Application', inPath: true,
     vendors: {
       'Apache HTTP Server': [
