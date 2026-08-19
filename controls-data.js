@@ -83,6 +83,20 @@ window.TMODAAS_CATALOG = [
         { t: 'Enforce baselines with Azure Policy', d: 'Assign the Microsoft cloud security benchmark initiative to audit/deny drift from the hardening baseline across resources.', iso: 'A.18.2.3', pci: '2.2', sev: 'Medium' },
         { t: 'Retain activity and resource logs', d: 'Route activity logs and diagnostics to Log Analytics with at least 12 months retention and alert on privileged operations.', iso: 'A.12.4.1', pci: '10.5.1', sev: 'Medium' },
       ],
+      'Amazon Web Services (EC2)': [
+        { t: 'Enable GuardDuty and Security Hub', d: 'Turn on GuardDuty threat detection and Security Hub with the AWS Foundational/CIS standards across all accounts and remediate active findings.', iso: 'A.12.6.1', pci: '11.2', sev: 'High' },
+        { t: 'Apply least-privilege security groups and NACLs', d: 'Scope security group ingress to required ports/sources only, deny direct SSH/RDP from 0.0.0.0/0 and use Session Manager/Systems Manager instead of bastion SSH.', iso: 'A.13.1.1', pci: '1.2.1', sev: 'High' },
+        { t: 'Enforce MFA and short-lived credentials', d: 'Require MFA for the root account and IAM users, prefer IAM roles/STS over long-lived access keys, and rotate any remaining keys regularly.', iso: 'A.9.2.3', pci: '8.3.1', sev: 'High' },
+        { t: 'Guard rail accounts with SCPs and Config', d: 'Apply Service Control Policies at the Organization level and AWS Config conformance packs so drift from the hardening baseline is detected and denied.', iso: 'A.18.2.3', pci: '2.2', sev: 'Medium' },
+        { t: 'Centralise CloudTrail and VPC Flow Logs', d: 'Enable an organization-wide CloudTrail trail and VPC Flow Logs to a dedicated, encrypted logging account with at least 12 months retention.', iso: 'A.12.4.1', pci: '10.5.1', sev: 'Medium' },
+      ],
+      'Google Cloud Platform (Compute Engine)': [
+        { t: 'Enable Security Command Center', d: 'Turn on Security Command Center Premium and remediate active findings (misconfigurations, vulnerabilities, active threats) across the organization.', iso: 'A.12.6.1', pci: '11.2', sev: 'High' },
+        { t: 'Apply least-privilege firewall rules', d: 'Scope VPC firewall rules to required tags/service accounts and ports, deny direct SSH/RDP from the internet and use Identity-Aware Proxy for admin access.', iso: 'A.13.1.1', pci: '1.2.1', sev: 'High' },
+        { t: 'Enforce MFA and least-privilege IAM', d: 'Require 2-Step Verification (or a security key) for all users, grant IAM roles at the narrowest scope and avoid primitive Owner/Editor roles on projects.', iso: 'A.9.2.3', pci: '8.3.1', sev: 'High' },
+        { t: 'Enforce Organization Policies', d: 'Apply Organization Policy constraints (e.g. restrict public IPs, require Shielded VM, disable serial port access) to keep resources on the hardening baseline.', iso: 'A.18.2.3', pci: '2.2', sev: 'Medium' },
+        { t: 'Centralise Cloud Audit and VPC Flow Logs', d: 'Enable Admin Activity/Data Access audit logs and VPC Flow Logs, export them to a dedicated logging project/SIEM with at least 12 months retention.', iso: 'A.12.4.1', pci: '10.5.1', sev: 'Medium' },
+      ],
     },
   },
   {
