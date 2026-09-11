@@ -22,24 +22,43 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
   <style>
     html, body { margin: 0; padding: 0; background: #161826; }
     @keyframes toastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 720px) {
+      .app-header { flex-wrap: wrap; height: auto !important; min-height: 60px; padding: 10px 16px !important; row-gap: 8px; }
+      .app-header-right { flex-wrap: wrap; row-gap: 8px; }
+      .step-pill { font-size: 11px !important; padding: 4px 7px !important; }
+      .register-wrap { padding: 32px 16px !important; }
+      .register-grid { grid-template-columns: 1fr !important; gap: 28px !important; }
+      .register-card { padding: 22px !important; }
+      .select-wrap, .results-wrap { padding-left: 16px !important; padding-right: 16px !important; }
+      .select-wrap { padding-bottom: 150px !important; }
+      .asset-grid { grid-template-columns: 1fr !important; }
+      .select-footer { flex-wrap: wrap; row-gap: 10px; padding: 12px 16px !important; }
+      .select-footer .btn { flex: 1; }
+      .ctl-row { grid-template-columns: 1fr !important; }
+      .ctl-tags { flex-direction: row !important; align-items: flex-start !important; flex-wrap: wrap; }
+    }
+    @media (max-width: 800px) {
+      .brand-tagline { display: none; }
+    }
   </style>
 </helmet>
 <div style="min-height:100vh;background:var(--color-bg);font-family:var(--font-body);color:var(--color-text);display:flex;flex-direction:column">
 
-  <header data-noprint="true" style="background:var(--color-bg);border-bottom:1px solid var(--color-divider);padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20">
+  <header data-noprint="true" class="app-header" style="background:var(--color-bg);border-bottom:1px solid var(--color-divider);padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20">
     <div style="display:flex;align-items:center;gap:12px">
       <div style="width:30px;height:30px;border:1px solid var(--color-accent);color:var(--color-accent);display:flex;align-items:center;justify-content:center;font-weight:500;font-size:15px;border-radius:var(--radius-md);font-family:var(--font-heading)">T</div>
       <div style="display:flex;align-items:baseline;gap:10px">
         <span style="font-weight:500;font-size:16px;letter-spacing:-0.01em;font-family:var(--font-heading)">TModaaS</span>
-        <span style="font-size:12.5px;color:var(--color-neutral-500)">Threat Modelling as a Service</span>
+        <span class="brand-tagline" style="font-size:12.5px;color:var(--color-neutral-500)">Threat Modelling as a Service</span>
       </div>
     </div>
-    <div style="display:flex;align-items:center;gap:20px">
-      <div style="display:flex;align-items:center;gap:8px">
+    <div class="app-header-right" style="display:flex;align-items:center;gap:20px">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <sc-for list="{{ steps }}" as="st" hint-placeholder-count="3">
           <div style="display:flex;align-items:center;gap:8px">
             <sc-if value="{{ st.notFirst }}" hint-placeholder-val="{{ false }}"><div style="width:16px;height:1px;background:var(--color-divider)"></div></sc-if>
-            <div style="{{ st.style }}">{{ st.n }}&nbsp; {{ st.label }}</div>
+            <div class="step-pill" style="{{ st.style }}">{{ st.n }}&nbsp; {{ st.label }}</div>
           </div>
         </sc-for>
       </div>
@@ -55,8 +74,8 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
 
   <!-- ============ REGISTRATION ============ -->
   <sc-if value="{{ isRegister }}" hint-placeholder-val="{{ true }}">
-    <div style="flex:1;display:flex;align-items:center;padding:48px 32px">
-      <div style="display:grid;grid-template-columns:1.1fr 1fr;gap:64px;max-width:960px;width:100%;margin:0 auto;align-items:center">
+    <div class="register-wrap" style="flex:1;display:flex;align-items:center;padding:48px 32px">
+      <div class="register-grid" style="display:grid;grid-template-columns:1.1fr 1fr;gap:64px;max-width:960px;width:100%;margin:0 auto;align-items:center">
         <div>
           <div style="font-size:11px;color:var(--color-accent);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:16px">Proof of concept</div>
           <h1 style="font-size:36px;line-height:1.12;font-weight:500;letter-spacing:-0.015em;margin:0 0 16px;font-family:var(--font-heading)">Threat modelling for your whole stack — no diagrams required.</h1>
@@ -70,7 +89,7 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
             </sc-for>
           </div>
         </div>
-        <div class="card elev-sm" style="padding:32px;border-radius:var(--radius-lg)">
+        <div class="card elev-sm register-card" style="padding:32px;border-radius:var(--radius-lg)">
           <h2 style="font-size:20px;font-weight:500;margin:0 0 4px;font-family:var(--font-heading)">Create your account</h2>
           <p style="font-size:13px;color:var(--color-neutral-500);margin:0 0 20px">Simulated registration — no email is sent.</p>
           <div style="display:flex;flex-direction:column;gap:14px">
@@ -101,7 +120,7 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
 
   <!-- ============ ASSET SELECTION ============ -->
   <sc-if value="{{ isSelect }}" hint-placeholder-val="{{ false }}">
-    <div style="flex:1;max-width:1080px;width:100%;margin:0 auto;padding:40px 32px 120px;box-sizing:border-box">
+    <div class="select-wrap" style="flex:1;max-width:1080px;width:100%;margin:0 auto;padding:40px 32px 120px;box-sizing:border-box">
       <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:28px;flex-wrap:wrap">
         <div>
           <h1 style="font-size:25px;font-weight:500;letter-spacing:-0.015em;margin:0 0 6px;font-family:var(--font-heading)">Select the assets in your data flow</h1>
@@ -109,7 +128,7 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
         </div>
         <button class="btn btn-primary" onClick="{{ loadSample }}" style="white-space:nowrap">Load sample scenario</button>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px">
+      <div class="asset-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px">
         <sc-for list="{{ categories }}" as="cat" hint-placeholder-count="7">
           <div style="{{ cat.cardStyle }}">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
@@ -126,7 +145,7 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
           </div>
         </sc-for>
       </div>
-      <div data-noprint="true" style="position:fixed;bottom:0;left:0;right:0;background:var(--color-surface);border-top:1px solid var(--color-divider);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;z-index:15">
+      <div data-noprint="true" class="select-footer" style="position:fixed;bottom:0;left:0;right:0;background:var(--color-surface);border-top:1px solid var(--color-divider);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;z-index:15">
         <span style="font-size:13.5px;color:var(--color-neutral-400)"><strong style="color:var(--color-text);font-weight:500">{{ selectedCount }}</strong> of {{ categoryCount }} asset layers selected</span>
         <div style="display:flex;align-items:center;gap:10px">
           <sc-if value="{{ selectedCount }}" hint-placeholder-val="{{ false }}">
@@ -140,7 +159,7 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
 
   <!-- ============ RESULTS ============ -->
   <sc-if value="{{ isResults }}" hint-placeholder-val="{{ false }}">
-    <div style="flex:1;max-width:1080px;width:100%;margin:0 auto;padding:36px 32px 80px;box-sizing:border-box">
+    <div class="results-wrap" style="flex:1;max-width:1080px;width:100%;margin:0 auto;padding:36px 32px 80px;box-sizing:border-box">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:24px;flex-wrap:wrap">
         <div>
           <h1 style="font-size:25px;font-weight:500;letter-spacing:-0.015em;margin:0 0 6px;font-family:var(--font-heading)">Recommended controls</h1>
@@ -195,19 +214,34 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
             </div>
             <div style="display:flex;flex-direction:column">
               <sc-for list="{{ grp.controls }}" as="ctl" hint-placeholder-count="3">
-                <div style="padding:16px 24px;border-bottom:1px solid color-mix(in srgb, var(--color-text) 7%, transparent);display:grid;grid-template-columns:1fr auto;gap:16px;align-items:start">
-                  <div>
-                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:5px">
-                      <span style="font-size:14px;font-weight:500;color:var(--color-text)">{{ ctl.t }}</span>
-                      <span style="{{ ctl.sevStyle }}">{{ ctl.sev }}</span>
+                <div style="padding:16px 24px;border-bottom:1px solid color-mix(in srgb, var(--color-text) 7%, transparent)">
+                  <div class="ctl-row" style="display:grid;grid-template-columns:1fr auto;gap:16px;align-items:start">
+                    <div>
+                      <div style="display:flex;align-items:center;gap:10px;margin-bottom:5px">
+                        <span style="font-size:14px;font-weight:500;color:var(--color-text)">{{ ctl.t }}</span>
+                        <span style="{{ ctl.sevStyle }}">{{ ctl.sev }}</span>
+                      </div>
+                      <p style="font-size:13.5px;color:var(--color-neutral-400);line-height:1.55;margin:0;max-width:640px;text-wrap:pretty">{{ ctl.d }}</p>
                     </div>
-                    <p style="font-size:13.5px;color:var(--color-neutral-400);line-height:1.55;margin:0;max-width:640px;text-wrap:pretty">{{ ctl.d }}</p>
+                    <div class="ctl-tags" style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+                      <sc-for list="{{ ctl.tags }}" as="tag" hint-placeholder-count="2">
+                        <span style="font-size:11px;letter-spacing:0.02em;color:var(--color-neutral-300);border:1px solid var(--color-divider);padding:3px 10px;border-radius:calc(var(--radius-md) * 0.75);white-space:nowrap">{{ tag }}</span>
+                      </sc-for>
+                    </div>
                   </div>
-                  <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
-                    <sc-for list="{{ ctl.tags }}" as="tag" hint-placeholder-count="2">
-                      <span style="font-size:11px;letter-spacing:0.02em;color:var(--color-neutral-300);border:1px solid var(--color-divider);padding:3px 10px;border-radius:calc(var(--radius-md) * 0.75);white-space:nowrap">{{ tag }}</span>
-                    </sc-for>
-                  </div>
+                  <sc-if value="{{ ctl.cmd }}" hint-placeholder-val="{{ false }}">
+                    <div style="margin-top:10px">
+                      <button data-noprint="true" onClick="{{ ctl.toggleCmd }}" style="font-size:12px;font-family:var(--font-heading);color:var(--color-accent);background:transparent;border:none;padding:0;cursor:pointer;display:inline-flex;align-items:center;gap:5px">
+                        <span style="display:inline-block;transition:transform 0.15s;transform:{{ ctl.caretTransform }}">▸</span>{{ ctl.cmdToggleLabel }}
+                      </button>
+                      <sc-if value="{{ ctl.cmdOpen }}" hint-placeholder-val="{{ false }}">
+                        <div style="position:relative;margin-top:8px;max-width:640px">
+                          <pre style="margin:0;padding:12px 44px 12px 14px;background:var(--color-bg);border:1px solid var(--color-divider);border-radius:var(--radius-md);font-size:12.5px;line-height:1.5;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--color-neutral-200);white-space:pre-wrap;word-break:break-word;overflow-x:auto">{{ ctl.cmd }}</pre>
+                          <button data-noprint="true" onClick="{{ ctl.copyCmd }}" title="Copy command" style="position:absolute;top:8px;right:8px;font-size:11px;font-family:var(--font-heading);color:var(--color-neutral-300);background:var(--color-surface);border:1px solid var(--color-divider);border-radius:var(--radius-sm);padding:4px 8px;cursor:pointer">Copy</button>
+                        </div>
+                      </sc-if>
+                    </div>
+                  </sc-if>
                 </div>
               </sc-for>
             </div>
@@ -254,6 +288,7 @@ class Component extends DCLogic {
     filter: 'all',
     emailOpen: false,
     toast: '',
+    expandedCmds: {},
   };
 
   SAMPLE = {
@@ -371,14 +406,35 @@ class Component extends DCLogic {
       .filter((cat) => s.selections[cat.key])
       .map((cat) => {
         const vendor = s.selections[cat.key];
-        const controls = (cat.vendors[vendor] || []).filter(filterMatch).map((c) => ({
-          t: c.t, d: c.d, sev: c.sev,
-          sevStyle: 'font-size:10.5px;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;padding:2px 9px;border-radius:calc(var(--radius-md) * 0.75);' +
-            (c.sev === 'High'
-              ? 'color:var(--color-accent-200);background:var(--color-accent-800)'
-              : 'color:var(--color-neutral-300);background:var(--color-neutral-800)'),
-          tags: [c.iso ? 'ISO 27001 ' + c.iso : null, c.pci ? 'PCI DSS ' + c.pci : null].filter(Boolean),
-        }));
+        const controls = (cat.vendors[vendor] || []).filter(filterMatch).map((c) => {
+          const cmdId = cat.key + '::' + vendor + '::' + c.t;
+          const cmdOpen = !!s.expandedCmds[cmdId];
+          return {
+            t: c.t, d: c.d, sev: c.sev, cmd: c.cmd || '',
+            sevStyle: 'font-size:10.5px;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;padding:2px 9px;border-radius:calc(var(--radius-md) * 0.75);' +
+              (c.sev === 'High'
+                ? 'color:var(--color-accent-200);background:var(--color-accent-800)'
+                : 'color:var(--color-neutral-300);background:var(--color-neutral-800)'),
+            tags: [c.iso ? 'ISO 27001 ' + c.iso : null, c.pci ? 'PCI DSS ' + c.pci : null].filter(Boolean),
+            cmdOpen,
+            cmdToggleLabel: cmdOpen ? 'Hide command' : 'Show command',
+            caretTransform: cmdOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+            toggleCmd: () => this.setState((prev) => {
+              const next = Object.assign({}, prev.expandedCmds);
+              if (next[cmdId]) delete next[cmdId]; else next[cmdId] = true;
+              return { expandedCmds: next };
+            }),
+            copyCmd: () => {
+              if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(c.cmd || '')
+                  .then(() => this.showToast('Command copied to clipboard'))
+                  .catch(() => this.showToast('Could not copy — select and copy manually'));
+              } else {
+                this.showToast('Clipboard unavailable — select and copy manually');
+              }
+            },
+          };
+        });
         return { key: cat.key, label: cat.label, vendor, controls, count: controls.length };
       })
       .filter((g) => g.count > 0);
